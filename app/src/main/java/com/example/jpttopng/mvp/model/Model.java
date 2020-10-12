@@ -30,7 +30,7 @@ public class Model {
 
     public Flowable<File> getFileTest() {
         return Flowable.just(mFile).doOnNext(t -> {
-            Thread.sleep(2000);//просто для того,чтобы посмотреть как работает. Картинка появится
+            Thread.sleep(10000);//просто для того,чтобы посмотреть как работает. Картинка появится
             compressAndSaveImageTest();
         });
     }
@@ -50,6 +50,7 @@ public class Model {
             e.printStackTrace();
         }
     }
+
 
 
 }

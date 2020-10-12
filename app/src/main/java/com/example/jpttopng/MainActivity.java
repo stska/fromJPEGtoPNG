@@ -1,24 +1,24 @@
 package com.example.jpttopng;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
 
 import android.annotation.SuppressLint;
 import android.content.ContentResolver;
-import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.provider.MediaStore;
-import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 
 import com.example.jpttopng.mvp.presenter.Presenter;
 import com.example.jpttopng.mvp.view.MainView;
+import com.google.android.material.snackbar.Snackbar;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -30,6 +30,8 @@ public class MainActivity extends AppCompatActivity implements MainView {
     private File file;
     private static String MY_PIC_DIR = "Pictures";
     private Presenter mPresenter;
+    private ConstraintLayout parentLayout;
+    private ProgressBar progressBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,14 +41,8 @@ public class MainActivity extends AppCompatActivity implements MainView {
         picture = findViewById(R.id.imageView);
         button = findViewById(R.id.button);
         button.setOnClickListener(view -> pickImage());
-
-    }
-
-    @Nullable
-    @Override
-    public View onCreateView(@Nullable View parent, @NonNull String name, @NonNull Context context, @NonNull AttributeSet attrs) {
-        return super.onCreateView(parent, name, context, attrs);
-
+        parentLayout = (ConstraintLayout) findViewById(R.id.parentLayout);
+        progressBar = (ProgressBar) findViewById(R.id.progressBar);
     }
 
 
@@ -62,6 +58,8 @@ public class MainActivity extends AppCompatActivity implements MainView {
                 Bitmap newProfilePic = extras.getParcelable("data");
                 file = new File(getExternalCacheDir(), "newImage" + ".jpg");
                 mPresenter.reformatPic(file, newProfilePic);
+                progressBar.setVisibility(View.VISIBLE);
+                askToCancel();
             }
         }
     }
@@ -96,6 +94,17 @@ public class MainActivity extends AppCompatActivity implements MainView {
         String sentToGallery = addImageToGallery(getContentResolver(), file);
         Log.v("image sent result", sentToGallery);
         picture.setImageBitmap(pic);
+    }
+
+    private void askToCancel() {
+        Snackbar.make(parentLayout, "Do you want to cancel?", Snackbar.LENGTH_LONG)
+                .setAction("Cancel", new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        mPresenter.cancelReformating();
+                        progressBar.setVisibility(View.GONE);
+                    }
+                }).show();
     }
 
 }
